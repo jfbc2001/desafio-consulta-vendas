@@ -1,10 +1,14 @@
 package com.devsuperior.dsmeta.services;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,12 +31,34 @@ public class SaleService {
     }
 
     @Transactional(readOnly = true)
-    public List<SaleMinDTO> searchSales(LocalDate minDate, LocalDate maxDate, String name) {    
-        return repository.searchSales(minDate, maxDate, name);
+    public Page<SaleMinDTO> searchSales(
+            String minDate,
+            String maxDate,
+            String name,
+            Pageable pageable) {
+
+        LocalDate max = maxDate.equals("")
+                ? LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault())
+                : LocalDate.parse(maxDate);
+
+        LocalDate min = minDate.equals("")
+                ? max.minusYears(1L)
+                : LocalDate.parse(minDate);
+
+        return repository.searchSales(min, max, name, pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<SaleSummaryDTO> summarySales(LocalDate minDate, LocalDate maxDate) {
-        return repository.summarySales(minDate, maxDate);
+    public List<SaleSummaryDTO> summarySales(String minDate, String maxDate) {
+
+        LocalDate max = maxDate.equals("")
+                ? LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault())
+                : LocalDate.parse(maxDate);
+
+        LocalDate min = minDate.equals("")
+                ? max.minusYears(1L)
+                : LocalDate.parse(minDate);
+
+        return repository.summarySales(min, max);
     }
 }

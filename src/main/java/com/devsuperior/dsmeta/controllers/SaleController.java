@@ -1,9 +1,10 @@
 package com.devsuperior.dsmeta.controllers;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,22 +30,13 @@ public class SaleController {
     }
 
     @GetMapping(value = "/report")
-    public ResponseEntity<List<SaleMinDTO>> getReport(
+    public ResponseEntity<Page<SaleMinDTO>> getReport(
             @RequestParam(name = "minDate", defaultValue = "") String minDate,
             @RequestParam(name = "maxDate", defaultValue = "") String maxDate,
-            @RequestParam(name = "name", defaultValue = "") String name) {
+            @RequestParam(name = "name", defaultValue = "") String name,
+            Pageable pageable) {
 
-        LocalDate today = LocalDate.now();
-
-        LocalDate min = minDate.equals("")
-                ? today.minusYears(1)
-                : LocalDate.parse(minDate);
-
-        LocalDate max = maxDate.equals("")
-                ? today
-                : LocalDate.parse(maxDate);
-
-        List<SaleMinDTO> result = service.searchSales(min, max, name);
+        Page<SaleMinDTO> result = service.searchSales(minDate, maxDate, name, pageable);
 
         return ResponseEntity.ok(result);
     }
@@ -54,17 +46,7 @@ public class SaleController {
             @RequestParam(name = "minDate", defaultValue = "") String minDate,
             @RequestParam(name = "maxDate", defaultValue = "") String maxDate) {
 
-        LocalDate today = LocalDate.now();
-
-        LocalDate min = minDate.equals("")
-                ? today.minusYears(1)
-                : LocalDate.parse(minDate);
-
-        LocalDate max = maxDate.equals("")
-                ? today
-                : LocalDate.parse(maxDate);
-
-        List<SaleSummaryDTO> result = service.summarySales(min, max);
+        List<SaleSummaryDTO> result = service.summarySales(minDate, maxDate);
 
         return ResponseEntity.ok(result);
     }
